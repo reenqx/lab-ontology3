@@ -143,13 +143,26 @@ h1 {
             const languageSelect = document.getElementById('language-select');
             const provinceNameInput = document.getElementById('province-name');
             const form = document.getElementById('search-form');
-
+            const heading = document.querySelector('h1'); // หัวข้อที่ต้องการเปลี่ยนข้อความ
+        
+            // เมื่อมีการเปลี่ยนภาษา
+            languageSelect.addEventListener('change', function () {
+                if (languageSelect.value === 'en') {
+                    heading.textContent = 'Search Province Information'; // เปลี่ยนเป็นภาษาอังกฤษ
+                    provinceNameInput.placeholder = "Enter Province Name"; // เปลี่ยน placeholder เป็นภาษาอังกฤษ
+                } else {
+                    heading.textContent = 'ค้นหาข้อมูลจังหวัด'; // กลับเป็นภาษาไทย
+                    provinceNameInput.placeholder = "ชื่อจังหวัด"; // เปลี่ยน placeholder เป็นภาษาไทย
+                }
+            });
+        
+            // ฟังก์ชันสำหรับค้นหาข้อมูลจังหวัด
             form.addEventListener('submit', function (event) {
                 event.preventDefault();
-
+        
                 let provinceName = provinceNameInput.value.trim();
                 let language = languageSelect.value;
-
+        
                 fetch(`/search_by_province?province=${provinceName}&lang=${language}`)
                     .then(response => response.json())
                     .then(data => {
@@ -178,6 +191,8 @@ h1 {
                     });
             });
         });
+        
+        
     </script>
 </head>
 <body>
