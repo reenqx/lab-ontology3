@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ค้นหาข้อมูลจังหวัด</title>
+    
+    <!-- Bootstrap 5 และ Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- ฟอนต์ภาษาไทยจาก Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* ===== ตั้งค่าธีมสีหลัก ===== */
+:root {
+    --primary-color:rgb(198, 72, 179); /* สีม่วงเข้ม */
+    --secondary-color:rgb(221, 62, 115); /* สีชมพูพาสเทลอ่อน */
+    --border-color:rgb(207, 98, 136); /* สีขอบชมพูอ่อน */
+    --shadow-color: rgba(106, 76, 156, 0.2);
+}
+
+/* ===== ตั้งค่าพื้นหลังพร้อมลวดลาย ===== */
+body {
+    font-family: 'Kanit', sans-serif;
+    background: linear-gradient(135deg,rgb(220, 92, 150) 0%,rgb(238, 140, 244) 100%); /* ไล่สีม่วงชมพู */
+    background-size: cover;
+    color: #333;
+}
+
+
+/* ===== ปรับขนาดของ container ===== */
+.container {
+    margin-top: 40px;
+    max-width: 900px;
+}
+
+/* ===== ปรับแต่งหัวข้อ ===== */
+h1 {
+    
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); /* เพิ่มเงาฟอนต์ */
+    color: white;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* ===== ปรับแต่งการ์ดค้นหา ===== */
+.search-card {
+    background-color: #fff;
+    border-radius: 50px;
+    padding: 10px;
+    box-shadow: 0 4px 10px var(--shadow-color);
+    border: 2px solid var(--border-color);
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* ===== ปรับแต่งการ์ดแสดงผล ===== */
+.result-card {
+    background-color: #fff;
+    border-radius: 20px;
+    padding: 30px; /* เพิ่ม padding ให้การ์ดกว้างขึ้น */
+    box-shadow: 0 4px 12px var(--shadow-color);
+    border: 2px solid var(--border-color);
+    max-width: 900px; /* ขยายขนาดของการ์ดคำตอบ */
+    margin: 20px auto;
+}
+
+/* ===== ปรับแต่ง input-group ให้ดูโมเดิร์น ===== */
+.input-group {
+    display: flex;
+    align-items: center;
+    border-radius: 50px;
+    background-color: #fff;
+    padding: 5px;
+    box-shadow: 0 3px 8px var(--shadow-color);
+    width: 100%;
+}
+
+/* ===== ปรับแต่ง input ค้นหาจังหวัด ===== */
+.input-group input {
+    flex: 7;
+    border: none;
+    background: transparent;
+    padding: 10px;
+    font-size: 1rem;
+    outline: none;
+    border-radius: 50px 0 0 50px;
+}
+
+/* ===== ปรับแต่ง select เลือกภาษา ===== */
+.input-group select {
+    flex: 1.5;
+    border: none;
+    background: transparent;
+    font-size: 1rem;
+    padding: 10px;
+    outline: none;
+    cursor: pointer;
+    text-align: center;
+    border-left: 2px solid var(--border-color);
+}
+
+/* ===== ปรับแต่งปุ่มค้นหาให้เข้ากับดีไซน์ ===== */
+.input-group button {
+    flex: 1.5;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 10px;
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    border-radius: 0 50px 50px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease-in-out;
+}
+
+.input-group button:hover {
+    color: #b71c5c;
+}
+
+/* ===== ปรับแต่งการ์ดผลลัพธ์ ===== */
+.result-card h2 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    text-align: center;
+    font-size: 1.5rem; /* เพิ่มขนาดของหัวข้อ */
+}
+.result-card p {
+    font-size: 1.1rem; /* เพิ่มขนาดของข้อความในผลลัพธ์ */
+    line-height: 1.6;
+}
+
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const languageSelect = document.getElementById('language-select');
+            const provinceNameInput = document.getElementById('province-name');
+            const form = document.getElementById('search-form');
+
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+
+                let provinceName = provinceNameInput.value.trim();
+                let language = languageSelect.value;
+
+                fetch(`/search_by_province?province=${provinceName}&lang=${language}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        let infoDiv = document.getElementById('province-info');
+                        if (data.error || data.message) {
+                            infoDiv.innerHTML = `<p class="text-danger">${data.error || data.message}</p>`;
+                        } else {
+                            let resultHTML = `
+                                <div class="result-card">
+                                    <h2>${data.province}</h2>
+                                    <p><img src="img/${data.img}" alt="Province Image" class="img-fluid rounded"></p>
+                                    <p><strong>${language === 'th' ? 'คำขวัญ' : 'Motto'} :  </strong> ${data.motto}</p>
+                                    <p><strong>${language === 'th' ? 'ตราประจำจังหวัด' : 'Seal'} :  </strong> ${data.seal}</p>
+                                    <p><strong>${language === 'th' ? 'ชื่อดั้งเดิม' : 'Traditional Names'} :  </strong> ${data.traditional_names.join(' , ')}</p>
+                                    <p><strong>${language === 'th' ? 'ต้นไม้' : 'Tree'} :  </strong> ${data.tree}</p>
+                                    <p><strong>${language === 'th' ? 'ดอกไม้' : 'Flower'} :  </strong> ${data.flower}</p>
+                                    <p><strong>${language === 'th' ? 'พิกัด' : 'Coordinates'} :  </strong> ${language === 'th' ? 'ละติจูด ' : 'Latitude '}${data.latitude}, ${language === 'th' ? 'ลองจิจูด ' : 'longitude '}${data.longitude}</p>
+                                    <p><strong>${language === 'th' ? 'ลิงค์เว็บไซต์' : 'Website'} :  </strong> <a href="${data.url}" target="_blank">${data.url}</a></p>
+                                </div>
+                            `;
+                            infoDiv.innerHTML = resultHTML;
+                        }
+                    })
+                    .catch(error => {
+                        document.getElementById('province-info').innerHTML = `<p class="text-danger">เกิดข้อผิดพลาดในการค้นหา</p>`;
+                    });
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>ค้นหาข้อมูลจังหวัด</h1>
+    
+        <!-- การ์ดแรก: ฟอร์มค้นหา -->
+        <div class="search-card">
+            <form id="search-form">
+                <div class="input-group">
+                    <input type="text" id="province-name" name="province" placeholder="ชื่อจังหวัด" required>
+                    <select id="language-select" name="lang">
+                        <option value="th">TH</option>
+                        <option value="en">EN</option>
+                    </select>
+                    <button type="submit">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    
+        <!-- การ์ดที่สอง: แสดงผล -->
+        <div id="province-info"></div>
+    </div>
+    
+    
+</body>
+</html>
